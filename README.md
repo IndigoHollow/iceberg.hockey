@@ -3,13 +3,13 @@
 
 Technical task:
 
-Необходимо реализовать отображение набора точек с лейблами на плоскости.
+Array of dots with labels should be displayed on the plane.
 
-Вход:
-Входными данными является набор точек плоскости вида Array< { x: number, y: number, label: string } >, где (x,y) - координата точки на плоскости, label - строковый лейбл точки.
+Input:
+Input is the set of dots on the plane Array< { x: number, y: number, label: string } >, where (x, y) - coordinates of dots on the plane, label - string label of dot.
 
-Выход:
-Вывести точки на html-странице, а также их лейблы. НЕ отображать лейбл, если он перекрывает одну из точек или другой лейбл.
+Output:
+Output dots with labels on html-page. Do NOT display labels if they overlapping another dot or another label.
 
 ###############################################################
 
