@@ -1,218 +1,205 @@
-const xPadding = 30, yPadding = 30;
-const letterwidth = 2.75;
-var graph = document.getElementById("graph");
-var c, r;
-var textrect;
-var indexX, indexY;
-var labX, labY; // coordinates of label placement
-var randValueX, randValueY; // random values from data.coordinates array
-var over; // indicator of overlapping
+const XPADDING = 30, YPADDING = 30; // paddings of axises on canvas
+const GRAPH = document.getElementById("graph"); // canvas
+const C = GRAPH.getContext("2d"); // context of drawing on canvas
+
 var data = {
-	    coordinates: [ { X: 1, Y: 10 }, { X: 2, Y: 20 }, { X: 3, Y: 30 }, { X: 4, Y: 40 }, { X: 5, Y: 50 }, { X: 6, Y: 60 }, { X: 7, Y: 70 }, { X: 8, Y: 80 }, { X: 9, Y: 90 }, { X: 10, Y: 100 } ],
-	    labels:      ["oilers", "blues", "devils", "rangers", "ducks", "flyers", "bruins", "panthers", "stars", "coyotes"],
-	    colors:      ["red", "orange", "yellow", "green", "blue", "navy", "violet", "pink", "gray", "black"]
-	   };  // collection of data
-var overlaparr = []; // array of overlappings
+             coordinates: [ { X: 1, Y: 10 }, { X: 2, Y: 20 }, { X: 3, Y: 30 }, { X: 4, Y: 40 }, { X: 5, Y: 50 }, { X: 6, Y: 60 }, { X: 7, Y: 70 }, { X: 8, Y: 80 }, { X: 9, Y: 90 }, { X: 10, Y: 100 } ],
+             labels:      ["oilers", "blues", "devils", "rangers", "ducks", "flyers", "bruins", "panthers", "stars", "coyotes"],
+             colors:      ["red", "orange", "yellow", "green", "blue", "navy", "violet", "pink", "gray", "black"]
+            };  // collection of data
 
-// Fills overlaparr array with zero (0 - no overlaping)
-function setZeroArr(rows, cols) {
-	var row = [];
-	
-	while (cols--) row.push(0);
-	while (rows--) overlaparr.push(row.slice());
+// Fills overlap_arr array with zero (0 - no overlaping) 
+function emptyOverlapArrayFrom(coordinates) {
+    var array = [];
+    var xyvalue = getMaxXY(coordinates);
+    var rows = xyvalue.X, cols = xyvalue.Y;
+    var row = [];
 
-	return overlaparr;
+    while (cols--) row.push(0);
+    while (rows--) array.push(row.slice());
+
+    return array;
 }
 
-// Returns the max X value in data list
-function getMaxX() {
-	var max = 0;
+// Returns the max X or Y value from data list
+function getMaxXY(array) {
+    var maximum_x = 0;
+    var maximum_y = 0;
 
-	for (var i = 0; i < data.coordinates.length; i++) {
-		if (data.coordinates[i].X > max) {
-			max = data.coordinates[i].X;
-		}
-	}
+    for (var i = 0; i < array.length; i++) {
+        maximum_x = array[i].X;
+        maximum_y = array[i].Y;
+    }
 
-	max += 10 - max % 10;
-	return max;
+    maximum_x += 10 - maximum_x % 10;
+    maximum_y += 10 - maximum_y % 10;
+
+    return {
+        X: maximum_x,
+        Y: maximum_y
+    };
 }
 
-// Returns the max Y value in data list
-function getMaxY() {
-	var max = 0;
-
-	for (var i = 0; i < data.coordinates.length; i++) {
-		if (data.coordinates[i].Y > max) {
-			max = data.coordinates[i].Y;
-		}
-	}
-
-	max += 10 - max % 10;
-	return max;
+// Returns the x pixel for a GRAPH point
+function getXPixel(val, coordinates) {
+    var xyvalue = getMaxXY(coordinates);
+    return ((GRAPH.width - XPADDING) / xyvalue.X) * val + (XPADDING);
 }
 
-// Returns the x pixel for a graph point
-function getXPixel(val) {
-	return ((graph.width - xPadding) / getMaxX()) * val + (xPadding);
+// Returns the y pixel for a GRAPH point
+function getYPixel(val, coordinates) {
+    var xyvalue = getMaxXY(coordinates);
+    return GRAPH.height - (((GRAPH.height - YPADDING) / xyvalue.Y) * val) - YPADDING;
 }
 
-// Returns the y pixel for a graph point
-function getYPixel(val) {
-	return graph.height - (((graph.height - yPadding) / getMaxY()) * val) - yPadding;
-}
+// Draws GRAPH with axes
+function drawGRAPH(context, coordinates) {
 
-// Draws graph with axes
-function drawGraph() {
+    context.lineWidth = 2;
+    context.strokeStyle = "#333";
+    context.font = "italic 8pt sans-serif";
+    context.textAlign = "center";
 
-	c = graph.getContext('2d');
+    // Draws the axises
+    context.beginPath();
+    context.moveTo(XPADDING, 0);
+    context.lineTo(XPADDING, GRAPH.height - YPADDING);
+    context.lineTo(GRAPH.width, GRAPH.height - YPADDING);
+    context.stroke();
 
-	c.lineWidth = 2;
-	c.strokeStyle = '#333';
-	c.font = 'italic 8pt sans-serif';
-	c.textAlign = "center";
+    var xyvalue = getMaxXY(coordinates);
 
-	// Draws the axises
-	c.beginPath();
-	c.moveTo(xPadding, 0);
-	c.lineTo(xPadding, graph.height - yPadding);
-	c.lineTo(graph.width, graph.height - yPadding);
-	c.stroke();
+    // Draws the X value texts
+    for (var i = 0; i < xyvalue.X - 9; i++) {
+        context.fillText(i, getXPixel(i, data.coordinates), GRAPH.height - YPADDING + 20);
+    }
 
-	// Draws the X value texts
-	for (i = 0; i < getMaxX() - 9; i++) {
-		c.fillText(i, getXPixel(i), graph.height - yPadding + 20);
-	}
+    // Draws the Y value texts
+    context.textAlign = "right";
+    context.textBaseline = "middle";
 
-	// Draws the Y value texts
-	c.textAlign = "right";
-	c.textBaseline = "middle";
+    for (var i = 0; i < xyvalue.Y; i += 10) {
+        context.fillText(i, XPADDING - 10, getYPixel(i, data.coordinates));
+    }
 
-	for (i = 0; i < getMaxY(); i += 10) {
-		c.fillText(i, xPadding - 10, getYPixel(i));
-	}
+    context.strokeStyle = "#f00";
 
-	c.strokeStyle = '#f00';
-	
 }
 
 // Draws labels
-function drawLabels(startX, startY, width, height, text, pos) {
+function drawLabels(context, startX, startY, width, height, text) {
 
-	labX = startX + width * letterwidth;
-	labY = startY + height / 2;
+    // coordinates of label placement
+    var lab_x = startX + width * 2.75;
+    var lab_y = startY + height / 2;
 
-	r = graph.getContext('2d');
-	r.fillStyle = "#333";
-	r.fillText(text, labX, labY);
-	
+    context.fillStyle = "#333";
+    context.fillText(text, lab_x, lab_y);
+
 }
 
 // Marks all taken dots and nearby areas as busy to avoid overlapping
-function detectTakenDots(x, y, over) {
+function detectTakenDots(array, x, y, over) {
 
-	if (over == 0) {
-		if (x > 0 && y > 1 && x < data.coordinates.length) {
-			overlaparr[x][y - 2] = 1;
-			overlaparr[x - 1][y - 2] = 1;
-		} else if (x > 0 && y > 1) {
-			overlaparr[x - 1][y - 2] = 1;
-		}
+    if (!over) {
+        if (x > 0 && y > 1 && x < array.length) {
+            overlap_arr[x][y - 2] = true;
+            overlap_arr[x - 1][y - 2] = true;
+        } else if (x > 0 && y > 1) {
+            overlap_arr[x - 1][y - 2] = true;
+        }
 
-		if (x > 1 && y > 1) {
-			overlaparr[x - 2][y - 2] = 1;
-		}
-	}
+        if (x > 1 && y > 1) {
+            overlap_arr[x - 2][y - 2] = true;
+        }
+    }
 
-	overlaparr[x - 1][y - 1] = 1;
+    overlap_arr[x - 1][y - 1] = true;
 
 }
 
 // Checks overlapping
-function checkOverlapping(x, y) {
+function checkOverlapping(coordinates, x, y) {
+    return ((x > 1 && x < coordinates.length && y > 1 && (overlap_arr[x - 1][y - 2] || overlap_arr[x - 2][y - 2] || overlap_arr[x - 1][y - 1] || overlap_arr[x][y - 2])) || (x == 1 && (overlap_arr[x - 1][y - 2] || overlap_arr[x][y - 2] || overlap_arr[x - 1][y - 1])) || y == 1 || (x == coordinates.length && (overlap_arr[x - 1][y - 2] || overlap_arr[x - 2][y - 2] || overlap_arr[x - 1][y - 1])));
+}
 
-	over = 0;
-
-	if ( (x > 1 && x < data.coordinates.length && y > 1 && (overlaparr[x - 1][y - 2] || overlaparr[x - 2][y - 2] || overlaparr[x - 1][y - 1] || overlaparr[x][y - 2])) || (x == 1 && (overlaparr[x - 1][y - 2] || overlaparr[x][y - 2] || overlaparr[x - 1][y - 1])) || y == 1 || (x == data.coordinates.length && (overlaparr[x - 1][y - 2] || overlaparr[x - 2][y - 2] || overlaparr[x - 1][y - 1])) ) {
-		over = 1;
-	}
-
-	return over;
-	
+// Drawing dots on canvas routine
+function setDotsOnCanvas(color, x, y, radius, startingAngle) {
+    C.fillStyle = color;
+    C.arc(x, y, radius, startingAngle, Math.PI * 2, true);
+    C.fill();
 }
 
 // Sets dots on the canvas
-function drawDots() {
+function drawDots(context, coordinates, labels) {
 
-	for (i = 0; i < data.coordinates.length; i++) {
-		randValueX = data.coordinates[Math.floor(Math.random() * data.coordinates.length)].X;
-		randValueY = data.coordinates[Math.floor(Math.random() * data.coordinates.length)].Y;
-		
-		// Gets index in array of selected value
-		function whatIndex(axis) {
-			for (j = 0; j < data.coordinates.length; j++) {
-				if (axis == "X") {
-					if (data.coordinates[j].X == randValueX) {
-						return j;
-					}
-				} else {
-					if (data.coordinates[j].Y == randValueY) {
-						return j;
-					}
-				}
-			}
-		}
-		
-		indexX = data.coordinates[whatIndex("X")].X;
-		indexY = data.coordinates[whatIndex("Y")].Y;
+    var rand_value_x = 0,
+        rand_value_y = 0; // random values from data.coordinates array 
 
-		//change coordinates if dot overlaps another dot
-		if (overlaparr[(indexX) - 1][(indexY / 10) - 1]) {
-			do {
-				randValueX = data.coordinates[Math.floor(Math.random() * data.coordinates.length)].X;
-				randValueY = data.coordinates[Math.floor(Math.random() * data.coordinates.length)].Y;
-				indexX = data.coordinates[whatIndex("X")].X;
-				indexY = data.coordinates[whatIndex("Y")].Y;
-			} while (overlaparr[(indexX) - 1][(indexY / 10) - 1]);
-		}
+    for (var i = 0; i < coordinates.length; i++) {
+        rand_value_x = coordinates[Math.floor(Math.random() * coordinates.length)].X;
+        rand_value_y = coordinates[Math.floor(Math.random() * coordinates.length)].Y;
 
-		c.beginPath();
-		c.fillStyle = data.colors[i];
-		c.arc(getXPixel(indexX), getYPixel(indexY), 4, 0, Math.PI * 2, true);
-		c.fill();
+        // Gets index in array of selected value
+        function whatIndex(axis) {
+            for (var j = 0; j < coordinates.length; j++) {
+                if (axis) {
+                    if (coordinates[j].X == rand_value_x) {
+                        return j;
+                    }
+                } else {
+                    if (coordinates[j].Y == rand_value_y) {
+                        return j;
+                    }
+                }
+            }
+        }
 
-		textrect = data.labels[i];
+        var index_x = coordinates[whatIndex(true)].X;
+        var index_y = coordinates[whatIndex(false)].Y;
+        var text_rect = labels[i];
 
-		over = checkOverlapping(indexX, indexY / 10);
+        //change coordinates if dot overlaps another dot
+        if (overlap_arr[(index_x) - 1][(index_y / 10) - 1]) {
+            do {
+                rand_value_x = coordinates[Math.floor(Math.random() * coordinates.length)].X;
+                rand_value_y = coordinates[Math.floor(Math.random() * coordinates.length)].Y;
+                index_x = coordinates[whatIndex(true)].X;
+                index_y = coordinates[whatIndex(false)].Y;
+            } while (overlap_arr[(index_x) - 1][(index_y / 10) - 1]);
+        }
 
-		detectTakenDots(indexX, indexY / 10, over);
-		
-		if (over == 0) {
-			drawLabels(getXPixel(indexX), getYPixel(indexY), textrect.length, 20, textrect, i);
-		}
-	}
-	
+        context.beginPath();
+        setDotsOnCanvas(data.colors[i], getXPixel(index_x, coordinates), getYPixel(index_y, coordinates), 4, 0);
+
+        var over = checkOverlapping(coordinates, index_x, index_y / 10);
+
+        detectTakenDots(coordinates, index_x, index_y / 10, over);
+
+        if (!over) {
+            drawLabels(C, getXPixel(index_x, coordinates), getYPixel(index_y, coordinates), text_rect.length, 20, text_rect, i);
+        }
+    }
+
 }
 
 // Draws matrix of dots for clarity
-function drawMatrix() {
+function drawMatrix(context, coordinates) {
 
-	for (i = 0; i < data.coordinates.length; i++) {
-		for (j = 0; j < data.coordinates.length; j++) {
-			c.beginPath();
+    for (var i = 0; i < coordinates.length; i++) {
+        for (var j = 0; j < coordinates.length; j++) {
+            context.beginPath();
 
-			if (overlaparr[i][j] == 0) {
-				c.fillStyle = "black";
-				c.arc(getXPixel(data.coordinates[i].X), getYPixel(data.coordinates[j].Y), 1, 0, Math.PI * 2, true);
-				c.fill();
-			}
+            if (overlap_arr[i][j] == 0) {
+                setDotsOnCanvas("black", getXPixel(coordinates[i].X, coordinates), getYPixel(coordinates[j].Y, coordinates), 1, 0);
+            }
 
-		}
-	}
-	
+        }
+    }
+
 }
 
-setZeroArr(getMaxX(), getMaxY());
-drawGraph();
-drawDots();
-drawMatrix();
+var overlap_arr = emptyOverlapArrayFrom(data.coordinates); // array of overlappings
+drawGRAPH(C, data.coordinates);
+drawDots(C, data.coordinates, data.labels);
+drawMatrix(C, data.coordinates);
