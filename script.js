@@ -8,10 +8,10 @@ var labX, labY; // coordinates of label placement
 var randValueX, randValueY; // random values from data.coordinates array
 var over; // indicator of overlapping
 var data = {
-			coordinates: [ { X: 1, Y: 10 }, { X: 2, Y: 20 }, { X: 3, Y: 30 }, { X: 4, Y: 40 }, { X: 5, Y: 50 }, { X: 6, Y: 60 }, { X: 7, Y: 70 }, { X: 8, Y: 80 }, { X: 9, Y: 90 }, { X: 10, Y: 100 } ],
-			labels:      ["oilers", "blues", "devils", "rangers", "ducks", "flyers", "bruins", "panthers", "stars", "coyotes"],
-			colors:      ["red", "orange", "yellow", "green", "blue", "navy", "violet", "pink", "gray", "black"]
-		   };  // collection of data
+	    coordinates: [ { X: 1, Y: 10 }, { X: 2, Y: 20 }, { X: 3, Y: 30 }, { X: 4, Y: 40 }, { X: 5, Y: 50 }, { X: 6, Y: 60 }, { X: 7, Y: 70 }, { X: 8, Y: 80 }, { X: 9, Y: 90 }, { X: 10, Y: 100 } ],
+	    labels:      ["oilers", "blues", "devils", "rangers", "ducks", "flyers", "bruins", "panthers", "stars", "coyotes"],
+	    colors:      ["red", "orange", "yellow", "green", "blue", "navy", "violet", "pink", "gray", "black"]
+	   };  // collection of data
 var overlaparr = []; // array of overlappings
 
 // Fills overlaparr array with zero (0 - no overlaping)
